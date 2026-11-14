@@ -1,1 +1,38 @@
+{% extends "base.html" %}
 
+{% block conteudo %}
+    <p><a href="/">← Voltar</a></p>
+
+    <div class="card">
+        <h2>Previsão de Doença Cardíaca</h2>
+        <p><strong>Modelo utilizado:</strong> {{ modelo | default("Nenhum", true) }}</p>
+
+        <form action="/previsao" method="post">
+            <input type="hidden" name="modelo" value="{{ modelo | default('', true) }}">
+            <p>
+                <label>Idade (anos):</label><br>
+                <input type="number" name="idade" required>
+            </p>
+            <p>
+                <label>Pressão em repouso (mmHg):</label><br>
+                <input type="number" name="pressao" required>
+            </p>
+            <p>
+                <label>Colesterol (mg/dl):</label><br>
+                <input type="number" name="colesterol" required>
+            </p>
+            <p>
+                <label>Frequência cardíaca máxima (bpm):</label><br>
+                <input type="number" name="freq_max" required>
+            </p>
+            <button type="submit">Prever</button>
+        </form>
+    </div>
+
+    {% if resultado %}
+        <div class="card resumo">
+            <h3>Resultado da Previsão</h3>
+            <p>{{ resultado }}</p>
+        </div>
+    {% endif %}
+{% endblock %}
