@@ -1,3 +1,4 @@
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
@@ -141,5 +142,27 @@ acuracia_arvore = accuracy_score(y_test, y_pred_arvore)
 print("\nResultado da Árvore de Decisão:")
 print(f"Acurácia: {acuracia_arvore:.2%}")
 
+# Criando o modelo Random Forest
+modelo_floresta = Pipeline(steps=[
+    ("preprocessamento", clone(preprocessador)),
+    ("classificador", RandomForestClassifier(
+        n_estimators=100,
+        max_depth=5,
+        min_samples_leaf=3,
+        random_state=42
+    ))
+])
+
+# Treinando o Random Forest
+modelo_floresta.fit(X_train, y_train)
+
+# Fazendo previsões com os dados de teste
+y_pred_floresta = modelo_floresta.predict(X_test)
+
+# Calculando a acurácia
+acuracia_floresta = accuracy_score(y_test, y_pred_floresta)
+
+print("\nResultado do Random Forest:")
+print(f"Acurácia: {acuracia_floresta:.2%}")
 
 
