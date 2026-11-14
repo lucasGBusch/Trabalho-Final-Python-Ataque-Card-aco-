@@ -13,3 +13,6 @@ __pycache__/
 
 # Arquivos temporários
 *.log
+
+# Arquivos temporários do VS Code Code Runner
+tempCodeRunnerFile.py

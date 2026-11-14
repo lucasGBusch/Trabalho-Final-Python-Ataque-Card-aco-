@@ -1,3 +1,5 @@
+import pandas as pd
+import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import clone
@@ -8,7 +10,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-import pandas as pd
 from pathlib import Path
 from sklearn.metrics import (
     precision_score,
@@ -189,3 +190,13 @@ for nome, previsoes in resultados.items():
 
     print("Matriz de confusão:")
     print(confusion_matrix(y_test, previsoes, labels=[0, 1]))
+
+
+# Definindo o caminho para salvar o modelo
+caminho_modelo = Path(__file__).resolve().parent / "models" / "melhor_modelo.joblib"
+
+# Salvando o modelo escolhido
+joblib.dump(modelo_logistico, caminho_modelo)
+
+print("\nModelo salvo com sucesso!")
+print("Local:", caminho_modelo)
