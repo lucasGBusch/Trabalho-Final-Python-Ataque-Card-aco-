@@ -7,32 +7,217 @@
         <h2>Previsão de Doença Cardíaca</h2>
         <p><strong>Modelo utilizado:</strong> {{ modelo | default("Nenhum", true) }}</p>
 
-        <form action="/previsao" method="post">
+        <form id="form-previsao" action="/previsao" method="post">
             <input type="hidden" name="modelo" value="{{ modelo | default('', true) }}">
-            <p>
-                <label>Idade (anos):</label><br>
-                <input type="number" name="idade" required>
-            </p>
-            <p>
-                <label>Pressão em repouso (mmHg):</label><br>
-                <input type="number" name="pressao" required>
-            </p>
-            <p>
-                <label>Colesterol (mg/dl):</label><br>
-                <input type="number" name="colesterol" required>
-            </p>
-            <p>
-                <label>Frequência cardíaca máxima (bpm):</label><br>
-                <input type="number" name="freq_max" required>
-            </p>
+
+            {% set ativos = campos_ativos if campos_ativos is defined else [
+                'idade', 'sexo', 'tipo_dor_peito', 'pressao_repouso', 'colesterol',
+                'acucar_sangue_jejum', 'ecg_repouso', 'freq_cardiaca_max', 'angina_exercicio'
+            ] %}
+            {% set valores = dados if dados is defined and dados else {} %}
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="idade" {% if 'idade' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="idade">Idade (anos):</label><br>
+                    <input type="number" id="idade" name="idade" min="1" max="120" value="{{ valores.get('idade', '') }}" required>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="sexo" {% if 'sexo' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="sexo">Sexo:</label><br>
+                    <select id="sexo" name="sexo" required>
+                        <option value="" disabled {% if valores.get('sexo', '') == '' %}selected{% endif %}>Selecione...</option>
+                        <option value="1" {% if valores.get('sexo')|string == '1' %}selected{% endif %}>Masculino (1)</option>
+                        <option value="0" {% if valores.get('sexo')|string == '0' %}selected{% endif %}>Feminino (0)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="tipo_dor_peito" {% if 'tipo_dor_peito' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="tipo_dor_peito">Tipo de dor no peito:</label><br>
+                    <select id="tipo_dor_peito" name="tipo_dor_peito" required>
+                        <option value="" disabled {% if valores.get('tipo_dor_peito', '') == '' %}selected{% endif %}>Selecione...</option>
+                        <option value="1" {% if valores.get('tipo_dor_peito')|string == '1' %}selected{% endif %}>Angina típica (1)</option>
+                        <option value="2" {% if valores.get('tipo_dor_peito')|string == '2' %}selected{% endif %}>Angina atípica (2)</option>
+                        <option value="3" {% if valores.get('tipo_dor_peito')|string == '3' %}selected{% endif %}>Dor não anginosa (3)</option>
+                        <option value="4" {% if valores.get('tipo_dor_peito')|string == '4' %}selected{% endif %}>Assintomático (4)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="pressao_repouso" {% if 'pressao_repouso' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="pressao_repouso">Pressão em repouso (mmHg):</label><br>
+                    <input type="number" step="any" id="pressao_repouso" name="pressao_repouso" min="0" value="{{ valores.get('pressao_repouso', '') }}" required>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="colesterol" {% if 'colesterol' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="colesterol">Colesterol (mg/dl):</label><br>
+                    <input type="number" step="any" id="colesterol" name="colesterol" min="0" value="{{ valores.get('colesterol', '') }}" required>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="acucar_sangue_jejum" {% if 'acucar_sangue_jejum' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="acucar_sangue_jejum">Açúcar no sangue em jejum (&gt; 120 mg/dl):</label><br>
+                    <select id="acucar_sangue_jejum" name="acucar_sangue_jejum" required>
+                        <option value="" disabled {% if valores.get('acucar_sangue_jejum', '') == '' %}selected{% endif %}>Selecione...</option>
+                        <option value="0" {% if valores.get('acucar_sangue_jejum')|string == '0' %}selected{% endif %}>Não (0)</option>
+                        <option value="1" {% if valores.get('acucar_sangue_jejum')|string == '1' %}selected{% endif %}>Sim (1)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="ecg_repouso" {% if 'ecg_repouso' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="ecg_repouso">ECG em repouso:</label><br>
+                    <select id="ecg_repouso" name="ecg_repouso" required>
+                        <option value="" disabled {% if valores.get('ecg_repouso', '') == '' %}selected{% endif %}>Selecione...</option>
+                        <option value="0" {% if valores.get('ecg_repouso')|string == '0' %}selected{% endif %}>Normal (0)</option>
+                        <option value="1" {% if valores.get('ecg_repouso')|string == '1' %}selected{% endif %}>Anormalidade ST-T (1)</option>
+                        <option value="2" {% if valores.get('ecg_repouso')|string == '2' %}selected{% endif %}>Hipertrofia ventricular esquerda (2)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="freq_cardiaca_max" {% if 'freq_cardiaca_max' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="freq_cardiaca_max">Frequência cardíaca máxima (bpm):</label><br>
+                    <input type="number" step="any" id="freq_cardiaca_max" name="freq_cardiaca_max" min="0" value="{{ valores.get('freq_cardiaca_max', '') }}" required>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <label class="campo-check">
+                    <input type="checkbox" name="usar_campos" value="angina_exercicio" {% if 'angina_exercicio' in ativos %}checked{% endif %}>
+                    Usar na previsão
+                </label>
+                <div class="campo-input">
+                    <label for="angina_exercicio">Angina induzida por exercício:</label><br>
+                    <select id="angina_exercicio" name="angina_exercicio" required>
+                        <option value="" disabled {% if valores.get('angina_exercicio', '') == '' %}selected{% endif %}>Selecione...</option>
+                        <option value="0" {% if valores.get('angina_exercicio')|string == '0' %}selected{% endif %}>Não (0)</option>
+                        <option value="1" {% if valores.get('angina_exercicio')|string == '1' %}selected{% endif %}>Sim (1)</option>
+                    </select>
+                </div>
+            </div>
+
+            <p id="aviso-campos" style="color: #b00020; display: none;">Selecione pelo menos um campo para realizar a previsão.</p>
             <button type="submit">Prever</button>
         </form>
     </div>
 
-    {% if resultado %}
+    <style>
+        .campo-grupo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .campo-check {
+            min-width: 150px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .campo-input {
+            flex: 1;
+        }
+        .campo-grupo.desativado .campo-input {
+            opacity: 0.45;
+        }
+    </style>
+
+    <script>
+        (function () {
+            const form = document.getElementById("form-previsao");
+            const aviso = document.getElementById("aviso-campos");
+            const checkboxes = form.querySelectorAll('input[name="usar_campos"]');
+
+            function atualizarCampo(checkbox) {
+                const grupo = checkbox.closest(".campo-grupo");
+                const controle = grupo.querySelector("input:not([type='checkbox']), select");
+                const ativo = checkbox.checked;
+
+                controle.disabled = !ativo;
+                controle.required = ativo;
+                grupo.classList.toggle("desativado", !ativo);
+            }
+
+            checkboxes.forEach((cb) => {
+                atualizarCampo(cb);
+                cb.addEventListener("change", () => {
+                    atualizarCampo(cb);
+                    aviso.style.display = "none";
+                });
+            });
+
+            form.addEventListener("submit", (event) => {
+                const algumMarcado = Array.from(checkboxes).some((cb) => cb.checked);
+                if (!algumMarcado) {
+                    event.preventDefault();
+                    aviso.style.display = "block";
+                }
+            });
+        })();
+    </script>
+
+    {% if erro is defined and erro %}
+        <div class="card" style="border-color: #b00020; color: #b00020;">
+            <h3>Erro na Previsão</h3>
+            <p>{{ erro }}</p>
+        </div>
+    {% endif %}
+
+    {% if resultado is defined and resultado %}
         <div class="card resumo">
             <h3>Resultado da Previsão</h3>
-            <p>{{ resultado }}</p>
+            <p><strong>Diagnóstico previsto:</strong> {{ resultado }}</p>
+
+            {% if dados is defined and dados %}
+                <p><strong>Dados utilizados na previsão:</strong></p>
+                <ul>
+                    {% for campo, valor in dados.items() %}
+                        <li><strong>{{ campo }}:</strong> {{ valor if valor is not none and valor != '' else 'Imputado pelo modelo' }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
