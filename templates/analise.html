@@ -1,1 +1,25 @@
+{% extends "base.html" %}
 
+{% block conteudo %}
+    <p><a href="/">← Voltar</a></p>
+
+    <div class="card resumo">
+        <h2>Análise do Modelo: {{ modelo | default("Nenhum", true) }}</h2>
+        <p>Tamanho do conjunto de teste, distribuição das classes e comparação com a classe mais frequente aparecerão aqui.</p>
+    </div>
+
+    <div class="card">
+        <h3>Acurácia</h3>
+        <p>Acurácia do modelo escolhido e comparação entre os modelos testados aparecerão aqui.</p>
+    </div>
+
+    <div class="card">
+        <h3>Matriz de Confusão</h3>
+        <p>Matriz de confusão (real vs. previsto) e explicação de falsos positivos/negativos aparecerão aqui.</p>
+    </div>
+
+    <form action="/previsao" method="get">
+        <input type="hidden" name="modelo" value="{{ modelo | default('', true) }}">
+        <button type="submit">Fazer Previsão com este Modelo</button>
+    </form>
+{% endblock %}

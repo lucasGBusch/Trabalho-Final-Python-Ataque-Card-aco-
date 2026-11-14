@@ -1,1 +1,35 @@
+{% extends "base.html" %}
 
+{% block conteudo %}
+    <div class="card">
+        <p>Escolha um modelo e clique em <strong>Analisar</strong> para ver os resultados do modelo.</p>
+        <form action="/analisar" method="post">
+            <select name="modelo" required>
+                <option value="RandomForestClassifier">Random Forest</option>
+                <option value="LogisticRegression">LogisticRegression</option>
+                <option value="DecisionTreeClassifier">DecisionTreeClassifier</option>
+            </select>
+            <button type="submit">Analisar</button>
+        </form>
+    </div>
+
+    <div class="card resumo">
+        <h2>Resumo dos Dados (CSV)</h2>
+        <p>Tamanho da base antes e depois da limpeza, valores ausentes tratados, amostra e 3 achados aparecerão aqui.</p>
+    </div>
+
+    <div class="card">
+        <h3>Gráfico 1 – Distribuição da idade por diagnóstico</h3>
+        <p>Imagem e interpretação do gráfico 1 aparecerão aqui.</p>
+    </div>
+
+    <div class="card">
+        <h3>Gráfico 2 – Pacientes por tipo de dor no peito</h3>
+        <p>Imagem e interpretação do gráfico 2 aparecerão aqui.</p>
+    </div>
+
+    <div class="card">
+        <h3>Gráfico 3 – Frequência cardíaca máxima por diagnóstico</h3>
+        <p>Imagem e interpretação do gráfico 3 aparecerão aqui.</p>
+    </div>
+{% endblock %}
