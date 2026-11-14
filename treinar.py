@@ -53,10 +53,12 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 print("\nQuantidade de registros para treinamento:")
 print(X_train.shape)
-
+def getRegistrosTreino():
+    return X_train.shape
 print("\nQuantidade de registros para teste:")
 print(X_test.shape)
-
+def getRegistrosTestes():
+    return X_test.shape
 print("\nDistribuição das classes no teste:")
 print(y_test.value_counts())
 
@@ -126,6 +128,8 @@ acuracia_logistica = accuracy_score(y_test, y_pred_logistico)
 
 print("\nResultado da Regressão Logística:")
 print(f"Acurácia: {acuracia_logistica:.2%}")
+def getAcuraciaL():
+    return acuracia_logistica
 
 # DecisionTree
 modelo_arvore = Pipeline(steps=[
@@ -148,7 +152,8 @@ acuracia_arvore = accuracy_score(y_test, y_pred_arvore)
 
 print("\nResultado da Árvore de Decisão:")
 print(f"Acurácia: {acuracia_arvore:.2%}")
-
+def getAcuraciaArv():
+    return acuracia_arvore
 # RandomForest
 modelo_floresta = Pipeline(steps=[
     ("preprocessamento", clone(preprocessador)),
@@ -171,6 +176,8 @@ acuracia_floresta = accuracy_score(y_test, y_pred_floresta)
 
 print("\nResultado do Random Forest:")
 print(f"Acurácia: {acuracia_floresta:.2%}")
+def getAcuraciaFl():
+    return acuracia_floresta
 
 
 # Comparando os resultados dos três modelos
@@ -179,7 +186,14 @@ resultados = {
     "Árvore de Decisão": y_pred_arvore,
     "Random Forest": y_pred_floresta
 }
-
+def getResultados():
+    return resultados
+def getRegressaoMatriz():
+    return y_pred_logistico.confusion_matrix
+def getArvoreMatriz():
+    return y_pred_logistico.confusion_matrix
+def getRandomMatriz():
+    return y_pred_logistico.confusion_matrix
 for nome, previsoes in resultados.items():
     print(f"\nAvaliação do modelo: {nome}")
 
