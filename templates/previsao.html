@@ -3,6 +3,7 @@
 {% block conteudo %}
     <p><a href="/">← Voltar</a></p>
 
+    <!-- Formulário com as nove características do paciente -->
     <div class="card">
         <h2>Previsão de Doença Cardíaca</h2>
         <p><strong>Modelo utilizado:</strong> {{ modelo | default("Nenhum", true) }}</p>
@@ -10,6 +11,7 @@
         <form id="form-previsao" action="/previsao" method="post">
             <input type="hidden" name="modelo" value="{{ modelo | default('', true) }}">
 
+            <!-- Por padrão, todos os campos começam marcados -->
             {% set ativos = campos_ativos if campos_ativos is defined else [
                 'idade', 'sexo', 'tipo_dor_peito', 'pressao_repouso', 'colesterol',
                 'acucar_sangue_jejum', 'ecg_repouso', 'freq_cardiaca_max', 'angina_exercicio'
@@ -164,6 +166,7 @@
         }
     </style>
 
+    <!-- Desabilita campos desmarcados e impede envio sem ao menos um campo ativo -->
     <script>
         (function () {
             const form = document.getElementById("form-previsao");
@@ -198,6 +201,7 @@
         })();
     </script>
 
+    <!-- Mensagem de erro de validação -->
     {% if erro is defined and erro %}
         <div class="card" style="border-color: #b00020; color: #b00020;">
             <h3>Erro na Previsão</h3>
@@ -205,6 +209,7 @@
         </div>
     {% endif %}
 
+    <!-- Resultado da previsão e resumo dos dados enviados -->
     {% if resultado is defined and resultado %}
         <div class="card resumo">
             <h3>Resultado da Previsão</h3>

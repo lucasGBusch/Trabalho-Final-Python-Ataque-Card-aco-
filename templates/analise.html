@@ -3,123 +3,80 @@
 {% block conteudo %}
     <p><a href="/">← Voltar</a></p>
 
+    <!-- Resumo do conjunto de teste e baseline -->
     <div class="card resumo">
         <h2>Análise do Modelo: {{ modelo | default("Nenhum", true) }}</h2>
 
-        {% if tamanho_teste is defined and tamanho_teste is not none %}
-            <p><strong>Tamanho do conjunto de teste:</strong> {{ tamanho_teste }} registros</p>
-        {% else %}
-            <p><strong>Tamanho do conjunto de teste:</strong> <em>Não informado</em></p>
-        {% endif %}
+        <p><strong>Tamanho do conjunto de teste:</strong> {{ tamanho_teste }} registros</p>
 
-        {% if distribuicao_teste is defined and distribuicao_teste %}
-            <p><strong>Distribuição das classes no teste:</strong></p>
-            {% if distribuicao_teste is mapping %}
-                <ul>
-                    {% for classe, qtd in distribuicao_teste.items() %}
-                        <li>Classe {{ classe }}: {{ qtd }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>{{ distribuicao_teste }}</p>
-            {% endif %}
-        {% else %}
-            <p><strong>Distribuição das classes no teste:</strong> <em>Não informada</em></p>
-        {% endif %}
+        <p><strong>Distribuição das classes no teste:</strong></p>
+        <ul>
+            {% for classe, qtd in distribuicao_teste.items() %}
+                <li>Classe {{ classe }}: {{ qtd }}</li>
+            {% endfor %}
+        </ul>
 
-        {% if baseline is defined and baseline is not none %}
-            <p><strong>Baseline (classe mais frequente):</strong> {{ baseline }}</p>
-        {% else %}
-            <p><strong>Baseline (classe mais frequente):</strong> <em>Não informado</em></p>
-        {% endif %}
+        <p><strong>Baseline (classe mais frequente):</strong> {{ baseline }}</p>
     </div>
 
+    <!-- Acurácia do modelo selecionado e tabela comparativa -->
     <div class="card">
         <h3>Acurácia</h3>
-        {% if acuracia is defined and acuracia is not none %}
-            <p><strong>Acurácia do modelo selecionado:</strong> {{ acuracia }}</p>
-        {% else %}
-            <p>Acurácia do modelo escolhido aparecerá aqui.</p>
-        {% endif %}
+        <p><strong>Acurácia do modelo selecionado:</strong> {{ acuracia }}</p>
 
-        {% if comparacao is defined and comparacao %}
-            <h4>Comparação entre modelos</h4>
-            {% if comparacao is mapping %}
-                <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Modelo</th>
-                            <th>Acurácia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for nome_modelo, valor in comparacao.items() %}
-                            <tr>
-                                <td>{{ nome_modelo }}</td>
-                                <td>{{ valor }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Modelo</th>
-                            <th>Acurácia</th>
-                            <th>Precisão</th>
-                            <th>Recall</th>
-                            <th>F1-score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in comparacao %}
-                            <tr>
-                                <td>{{ item.modelo | default(item[0], true) }}</td>
-                                <td>{{ item.acuracia | default(item[1], true) }}</td>
-                                <td>{{ item.precisao | default("-", true) }}</td>
-                                <td>{{ item.recall | default("-", true) }}</td>
-                                <td>{{ item.f1 | default("-", true) }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-        {% else %}
-            <p>Comparação entre os modelos testados aparecerá aqui.</p>
-        {% endif %}
+        <h4>Comparação entre modelos</h4>
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th>Modelo</th>
+                    <th>Acurácia</th>
+                    <th>Precisão</th>
+                    <th>Recall</th>
+                    <th>F1-score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comparacao %}
+                    <tr>
+                        <td>{{ item.modelo }}</td>
+                        <td>{{ item.acuracia }}</td>
+                        <td>{{ item.precisao }}</td>
+                        <td>{{ item.recall }}</td>
+                        <td>{{ item.f1 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
+    <!-- Matriz de confusão (real vs. previsto) -->
     <div class="card">
         <h3>Matriz de Confusão</h3>
-        {% if matriz_confusao is defined and matriz_confusao %}
-            <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; text-align: center;">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Previsto: 0 (Sem doença)</th>
-                        <th>Previsto: 1 (Com doença)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th>Real: 0 (Sem doença)</th>
-                        <td>{{ matriz_confusao[0][0] }} (VN)</td>
-                        <td>{{ matriz_confusao[0][1] }} (FP)</td>
-                    </tr>
-                    <tr>
-                        <th>Real: 1 (Com doença)</th>
-                        <td>{{ matriz_confusao[1][0] }} (FN)</td>
-                        <td>{{ matriz_confusao[1][1] }} (VP)</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p><small>VN = Verdadeiro Negativo | FP = Falso Positivo | FN = Falso Negativo | VP = Verdadeiro Positivo</small></p>
-        {% else %}
-            <p>Matriz de confusão (real vs. previsto) e explicação de falsos positivos/negativos aparecerão aqui.</p>
-        {% endif %}
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; text-align: center;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Previsto: 0 (Sem doença)</th>
+                    <th>Previsto: 1 (Com doença)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Real: 0 (Sem doença)</th>
+                    <td>{{ matriz_confusao[0][0] }} (VN)</td>
+                    <td>{{ matriz_confusao[0][1] }} (FP)</td>
+                </tr>
+                <tr>
+                    <th>Real: 1 (Com doença)</th>
+                    <td>{{ matriz_confusao[1][0] }} (FN)</td>
+                    <td>{{ matriz_confusao[1][1] }} (VP)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><small>VN = Verdadeiro Negativo | FP = Falso Positivo | FN = Falso Negativo | VP = Verdadeiro Positivo</small></p>
     </div>
 
+    <!-- Envia o modelo selecionado para a página de previsão -->
     <form action="/previsao" method="get">
         <input type="hidden" name="modelo" value="{{ modelo | default('', true) }}">
         <button type="submit">Fazer Previsão com este Modelo</button>
