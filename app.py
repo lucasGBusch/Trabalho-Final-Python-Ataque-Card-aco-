@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import Flask, render_template, request
 
 import dados
-from treinar import avaliar_modelo, fazer_previsao, COLUNAS
+from modelo import avaliar_modelo, fazer_previsao, COLUNAS
 
 
 app = Flask(__name__)
@@ -38,7 +38,7 @@ def analisar():
     nome_modelo = request.form.get("modelo")
 
     try:
-        # Busca as métricas calculadas no treinar.py
+        # Busca as métricas calculadas no modelo.py
         avaliacao = avaliar_modelo(nome_modelo)
 
     except ValueError as erro:
@@ -91,7 +91,7 @@ def previsao():
     erro = None
 
     try:
-        # Executa a função criada no treinar.py
+        # Executa a função criada no modelo.py
         resultado = fazer_previsao(
             nome_modelo,
             dados,
