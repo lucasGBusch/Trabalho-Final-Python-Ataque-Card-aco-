@@ -19,7 +19,16 @@ app = Flask(__name__)
 def index():
     resultado = dados.rodar("data/dataset_cleveland_didatico.csv")
     graficos = resultado["graficos"]
-    return render_template("index.html", graficos=graficos)
+    return render_template(
+        "index.html",
+        graficos=graficos,
+        diagnostico=resultado["diagnostico"],
+        tamanho_depois=len(resultado["df_limpo"]),
+        log=resultado["log"],
+        achados=resultado["analise"]["achados"],
+        amostra=resultado["df_limpo"].head(5).to_dict(orient="records"),
+        colunas=list(resultado["df_limpo"].columns),
+    )
 
 @app.route("/analisar", methods=["POST"])
 def analisar():
