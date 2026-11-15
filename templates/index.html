@@ -15,21 +15,97 @@
 
     <div class="card resumo">
         <h2>Resumo dos Dados (CSV)</h2>
-        <p>Tamanho da base antes e depois da limpeza, valores ausentes tratados, amostra e 3 achados aparecerão aqui.</p>
+        {% if diagnostico is defined %}
+            <p>
+                <strong>Antes da limpeza:</strong> {{ diagnostico.linhas }} registros e {{ diagnostico.colunas }} colunas
+                (duplicatas: {{ diagnostico.duplicatas }}).
+                {% if tamanho_depois is defined %}
+                    <br><strong>Depois da limpeza:</strong> {{ tamanho_depois }} registros.
+                {% endif %}
+            </p>
+
+            {% if diagnostico.ausentes %}
+                <p><strong>Valores ausentes encontrados:</strong></p>
+                <ul>
+                    {% for col, qtd in diagnostico.ausentes.items() %}
+                        <li>{{ col }}: {{ qtd }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if log is defined and log %}
+                <p><strong>Tratamento aplicado:</strong></p>
+                <ul>
+                    {% for passo in log %}
+                        <li>{{ passo }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if achados is defined and achados %}
+                <p><strong>Principais achados:</strong></p>
+                <ul>
+                    {% for achado in achados %}
+                        <li>{{ achado }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if amostra is defined and amostra and colunas is defined %}
+                <p><strong>Amostra dos dados limpos (5 primeiras linhas):</strong></p>
+                <div style="overflow-x: auto;">
+                    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-size: 14px; width: 100%;">
+                        <thead>
+                            <tr>
+                                {% for col in colunas %}
+                                    <th>{{ col }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in amostra %}
+                                <tr>
+                                    {% for col in colunas %}
+                                        <td>{{ linha[col] if linha[col] == linha[col] else 'NaN' }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Tamanho da base antes e depois da limpeza, valores ausentes tratados, amostra e 3 achados aparecerão aqui.</p>
+        {% endif %}
     </div>
 
     <div class="card">
         <h3>Gráfico 1 – Distribuição da idade por diagnóstico</h3>
-        <p>Imagem e interpretação do gráfico 1 aparecerão aqui.</p>
+        {% if graficos is defined and graficos.idade %}
+            <img src="data:image/png;base64,{{ graficos.idade }}" alt="Distribuição da idade por diagnóstico" style="max-width: 100%; height: auto;">
+        {% else %}
+            <p>Imagem do gráfico 1 não disponível.</p>
+        {% endif %}
+        <p>Compara a distribuição das faixas etárias entre pacientes sem doença (esquerda) e com doença cardíaca (direita).</p>
     </div>
 
     <div class="card">
         <h3>Gráfico 2 – Pacientes por tipo de dor no peito</h3>
-        <p>Imagem e interpretação do gráfico 2 aparecerão aqui.</p>
+        {% if graficos is defined and graficos.dor %}
+            <img src="data:image/png;base64,{{ graficos.dor }}" alt="Pacientes por tipo de dor no peito" style="max-width: 100%; height: auto;">
+        {% else %}
+            <p>Imagem do gráfico 2 não disponível.</p>
+        {% endif %}
+        <p>Mostra a quantidade de pacientes com e sem doença cardíaca em cada categoria de dor no peito.</p>
     </div>
 
     <div class="card">
         <h3>Gráfico 3 – Frequência cardíaca máxima por diagnóstico</h3>
-        <p>Imagem e interpretação do gráfico 3 aparecerão aqui.</p>
+        {% if graficos is defined and graficos.frequencia %}
+            <img src="data:image/png;base64,{{ graficos.frequencia }}" alt="Frequência cardíaca máxima por diagnóstico" style="max-width: 100%; height: auto;">
+        {% else %}
+            <p>Imagem do gráfico 3 não disponível.</p>
+        {% endif %}
+        <p>Apresenta a distribuição e a mediana da frequência cardíaca máxima atingida por cada grupo.</p>
     </div>
 {% endblock %}
