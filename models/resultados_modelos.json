@@ -1,0 +1,72 @@
+{
+    "tamanho_teste": 61,
+    "distribuicao_teste": {
+        "0": 15,
+        "1": 46
+    },
+    "baseline": 0.7540983606557377,
+    "comparacao": [
+        {
+            "modelo": "LogisticRegression",
+            "acuracia": 0.8032786885245902,
+            "precisao": 0.8035714285714286,
+            "recall": 0.9782608695652174,
+            "f1": 0.8823529411764706
+        },
+        {
+            "modelo": "DecisionTreeClassifier",
+            "acuracia": 0.7540983606557377,
+            "precisao": 0.7818181818181819,
+            "recall": 0.9347826086956522,
+            "f1": 0.8514851485148515
+        },
+        {
+            "modelo": "RandomForestClassifier",
+            "acuracia": 0.7868852459016393,
+            "precisao": 0.7894736842105263,
+            "recall": 0.9782608695652174,
+            "f1": 0.8737864077669902
+        }
+    ],
+    "avaliacoes": {
+        "LogisticRegression": {
+            "acuracia": 0.8032786885245902,
+            "matriz_confusao": [
+                [
+                    4,
+                    11
+                ],
+                [
+                    1,
+                    45
+                ]
+            ]
+        },
+        "DecisionTreeClassifier": {
+            "acuracia": 0.7540983606557377,
+            "matriz_confusao": [
+                [
+                    3,
+                    12
+                ],
+                [
+                    3,
+                    43
+                ]
+            ]
+        },
+        "RandomForestClassifier": {
+            "acuracia": 0.7868852459016393,
+            "matriz_confusao": [
+                [
+                    3,
+                    12
+                ],
+                [
+                    1,
+                    45
+                ]
+            ]
+        }
+    }
+}

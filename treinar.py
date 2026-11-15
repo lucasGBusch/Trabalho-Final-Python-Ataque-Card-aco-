@@ -1,216 +1,289 @@
-import pandas as pd
-import joblib
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.base import clone
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
+
+import json
 from pathlib import Path
+
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.base import clone
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    precision_score,
-    recall_score,
-    f1_score,
-    confusion_matrix
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix
 )
-
-# Localizando o dataset
-caminho = Path(__file__).resolve().parent / "data" / "dataset_cleveland_didatico.csv"
-
-
-df = pd.read_csv(caminho)
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.tree import DecisionTreeClassifier
 
 
-X = df.drop(columns=["num"])
+# 1. Arquivos e colunas utilizadas
+BASE = Path(__file__).resolve().parent
+PASTA_MODELOS = BASE / "models"
+ARQUIVO_CSV = BASE / "data" / "dataset_cleveland_didatico.csv"
+ARQUIVO_RESULTADOS = PASTA_MODELOS / "resultados_modelos.json"
 
-#
-y = (df["num"] > 0).astype(int)
-
-
-print("Variáveis utilizadas no treinamento:")
-print(X.columns.tolist())
-
-print("\nQuantidade de registros e variáveis:")
-print(X.shape)
-
-print("\nDistribuição da variável alvo:")
-print(y.value_counts())
-
-
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.20,
-    random_state=42,
-    stratify=y
-)
-
-
-print("\nQuantidade de registros para treinamento:")
-print(X_train.shape)
-def getRegistrosTreino():
-    return X_train.shape
-print("\nQuantidade de registros para teste:")
-print(X_test.shape)
-def getRegistrosTestes():
-    return X_test.shape
-print("\nDistribuição das classes no teste:")
-print(y_test.value_counts())
-
-
-
-colunas_numericas = [
-    "idade",
-    "pressao_repouso",
-    "colesterol",
-    "freq_cardiaca_max"
-]
-
-colunas_categoricas = [
-    "sexo",
-    "tipo_dor_peito",
-    "acucar_sangue_jejum",
-    "ecg_repouso",
-    "angina_exercicio"
-]
-
-
-print("\nValores ausentes no conjunto de treinamento:")
-print(X_train.isnull().sum())
-
-
-print("\nValores ausentes no conjunto de teste:")
-print(X_test.isnull().sum())
-
-
-
-preprocessamento_numerico = Pipeline(steps=[
-    ("imputador", SimpleImputer(strategy="median")),
-    ("escalador", StandardScaler())
-])
-
-
-preprocessamento_categorico = Pipeline(steps=[
-    ("imputador", SimpleImputer(strategy="most_frequent")),
-    ("codificador", OneHotEncoder(handle_unknown="ignore"))
-])
-
-
-preprocessador = ColumnTransformer(transformers=[
-    ("numericas", preprocessamento_numerico, colunas_numericas),
-    ("categoricas", preprocessamento_categorico, colunas_categoricas)
-])
-
-print("\nPre-processamento configurado com sucesso!")
-
-# LogisticRegression
-modelo_logistico = Pipeline(steps=[
-    ("preprocessamento", preprocessador),
-    ("classificador", LogisticRegression(
-        max_iter=1000,
-        random_state=42
-    ))
-])
-
-
-modelo_logistico.fit(X_train, y_train)
-
-
-y_pred_logistico = modelo_logistico.predict(X_test)
-
-
-acuracia_logistica = accuracy_score(y_test, y_pred_logistico)
-
-print("\nResultado da Regressão Logística:")
-print(f"Acurácia: {acuracia_logistica:.2%}")
-def getAcuraciaL():
-    return acuracia_logistica
-
-# DecisionTree
-modelo_arvore = Pipeline(steps=[
-    ("preprocessamento", clone(preprocessador)),
-    ("classificador", DecisionTreeClassifier(
-        max_depth=4,
-        min_samples_leaf=5,
-        random_state=42
-    ))
-])
-
-
-modelo_arvore.fit(X_train, y_train)
-
-
-y_pred_arvore = modelo_arvore.predict(X_test)
-
-
-acuracia_arvore = accuracy_score(y_test, y_pred_arvore)
-
-print("\nResultado da Árvore de Decisão:")
-print(f"Acurácia: {acuracia_arvore:.2%}")
-def getAcuraciaArv():
-    return acuracia_arvore
-# RandomForest
-modelo_floresta = Pipeline(steps=[
-    ("preprocessamento", clone(preprocessador)),
-    ("classificador", RandomForestClassifier(
-        n_estimators=100,
-        max_depth=5,
-        min_samples_leaf=3,
-        random_state=42
-    ))
-])
-
-
-modelo_floresta.fit(X_train, y_train)
-
-
-y_pred_floresta = modelo_floresta.predict(X_test)
-
-
-acuracia_floresta = accuracy_score(y_test, y_pred_floresta)
-
-print("\nResultado do Random Forest:")
-print(f"Acurácia: {acuracia_floresta:.2%}")
-def getAcuraciaFl():
-    return acuracia_floresta
-
-
-# Comparando os resultados dos três modelos
-resultados = {
-    "Regressão Logística": y_pred_logistico,
-    "Árvore de Decisão": y_pred_arvore,
-    "Random Forest": y_pred_floresta
+ARQUIVOS_MODELOS = {
+    "LogisticRegression": "logistic_regression.joblib",
+    "DecisionTreeClassifier": "decision_tree.joblib",
+    "RandomForestClassifier": "random_forest.joblib"
 }
-def getResultados():
-    return resultados
-def getRegressaoMatriz():
-    return y_pred_logistico.confusion_matrix
-def getArvoreMatriz():
-    return y_pred_logistico.confusion_matrix
-def getRandomMatriz():
-    return y_pred_logistico.confusion_matrix
-for nome, previsoes in resultados.items():
-    print(f"\nAvaliação do modelo: {nome}")
 
-    print(f"Acurácia: {accuracy_score(y_test, previsoes):.2%}")
-    print(f"Precisão: {precision_score(y_test, previsoes, zero_division=0):.2%}")
-    print(f"Recall: {recall_score(y_test, previsoes, zero_division=0):.2%}")
-    print(f"F1-score: {f1_score(y_test, previsoes, zero_division=0):.2%}")
+COLUNAS = [
+    "idade", "sexo", "tipo_dor_peito", "pressao_repouso", "colesterol",
+    "acucar_sangue_jejum", "ecg_repouso", "freq_cardiaca_max", "angina_exercicio"
+]
 
-    print("Matriz de confusão:")
-    print(confusion_matrix(y_test, previsoes, labels=[0, 1]))
+NUMERICAS = [
+    "idade", "pressao_repouso", "colesterol", "freq_cardiaca_max"
+]
+
+CATEGORICAS = [
+    "sexo", "tipo_dor_peito", "acucar_sangue_jejum",
+    "ecg_repouso", "angina_exercicio"
+]
+
+CATEGORIAS_VALIDAS = {
+    "sexo": [0, 1],
+    "tipo_dor_peito": [1, 2, 3, 4],
+    "acucar_sangue_jejum": [0, 1],
+    "ecg_repouso": [0, 1, 2],
+    "angina_exercicio": [0, 1]
+}
 
 
-# Definindo o caminho para salvar o modelo
-caminho_modelo = Path(__file__).resolve().parent / "models" / "melhor_modelo.joblib"
+# 2. Treina os três modelos, testa e salva os resultados
+def treinar_modelos():
+    df = pd.read_csv(ARQUIVO_CSV)
 
-# Salvando o modelo escolhido
-joblib.dump(modelo_logistico, caminho_modelo)
+    X = df[COLUNAS]                     # Características dos pacientes
+    y = (df["num"] > 0).astype(int)     # 0 = sem doença, 1 = com doença
 
-print("\nModelo salvo com sucesso!")
-print("Local:", caminho_modelo)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.20, random_state=42, stratify=y
+    )
+
+    # Prepara números e categorias sem usar os dados de teste para aprender
+    preparo_numerico = Pipeline([
+        ("preencher", SimpleImputer(strategy="median")),
+        ("padronizar", StandardScaler())
+    ])
+
+    preparo_categorico = Pipeline([
+        ("preencher", SimpleImputer(strategy="most_frequent")),
+        ("codificar", OneHotEncoder(handle_unknown="ignore"))
+    ])
+
+    preprocessador = ColumnTransformer([
+        ("numericas", preparo_numerico, NUMERICAS),
+        ("categoricas", preparo_categorico, CATEGORICAS)
+    ])
+
+    # Criando os três algoritmos
+    algoritmos = {
+        "LogisticRegression": LogisticRegression(
+            max_iter=1000, random_state=42
+        ),
+
+        "DecisionTreeClassifier": DecisionTreeClassifier(
+            max_depth=4, min_samples_leaf=5, random_state=42
+        ),
+
+        "RandomForestClassifier": RandomForestClassifier(
+            n_estimators=100, max_depth=5,
+            min_samples_leaf=3, random_state=42
+        )
+    }
+
+    PASTA_MODELOS.mkdir(exist_ok=True)
+
+    avaliacoes = {}
+    comparacao = []
+
+    print(f"Total de pacientes: {len(df)}")
+    print(f"Treinamento: {len(X_train)} | Teste: {len(X_test)}")
+
+    # Repetindo o mesmo treinamento para os três modelos
+    for nome, algoritmo in algoritmos.items():
+        modelo = Pipeline([
+            ("preprocessamento", clone(preprocessador)),
+            ("classificador", algoritmo)
+        ])
+
+        modelo.fit(X_train, y_train)             # Aprende com o treino
+        y_pred = modelo.predict(X_test)          # Prevê os pacientes do teste
+
+        acuracia = accuracy_score(y_test, y_pred)
+
+        matriz = confusion_matrix(
+            y_test, y_pred, labels=[0, 1]
+        ).tolist()
+
+        # Métricas para comparação dos algoritmos
+        comparacao.append({
+            "modelo": nome,
+            "acuracia": float(acuracia),
+            "precisao": float(precision_score(
+                y_test, y_pred, zero_division=0
+            )),
+            "recall": float(recall_score(
+                y_test, y_pred, zero_division=0
+            )),
+            "f1": float(f1_score(
+                y_test, y_pred, zero_division=0
+            ))
+        })
+
+        # Resultado individual de cada modelo
+        avaliacoes[nome] = {
+            "acuracia": float(acuracia),
+            "matriz_confusao": matriz
+        }
+
+        # Salvando cada modelo treinado
+        joblib.dump(
+            modelo,
+            PASTA_MODELOS / ARQUIVOS_MODELOS[nome]
+        )
+
+        # Mantendo compatibilidade com o modelo.py antigo
+        if nome == "LogisticRegression":
+            joblib.dump(
+                modelo,
+                PASTA_MODELOS / "melhor_modelo.joblib"
+            )
+
+        print(f"{nome}: acurácia de {acuracia:.2%}")
+        print("Matriz de confusão:", matriz)
+
+    # Guardando as informações do conjunto de teste
+    resultados = {
+        "tamanho_teste": len(y_test),
+        "distribuicao_teste": {
+            "0": int((y_test == 0).sum()),
+            "1": int((y_test == 1).sum())
+        },
+        "baseline": float(
+            y_test.value_counts(normalize=True).max()
+        ),
+        "comparacao": comparacao,
+        "avaliacoes": avaliacoes
+    }
+
+    # Salvando métricas para o Flask consultar
+    with open(ARQUIVO_RESULTADOS, "w", encoding="utf-8") as arquivo:
+        json.dump(resultados, arquivo, ensure_ascii=False, indent=4)
+
+    pd.DataFrame(comparacao).to_csv(
+        PASTA_MODELOS / "resultados_modelos.csv",
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+    print("\nTrês modelos e métricas salvos na pasta models!")
+
+
+# 3. Entrega as informações da análise para o Flask
+def avaliar_modelo(nome_modelo):
+    if nome_modelo not in ARQUIVOS_MODELOS:
+        raise ValueError("Modelo não reconhecido.")
+
+    with open(ARQUIVO_RESULTADOS, encoding="utf-8") as arquivo:
+        resultados = json.load(arquivo)
+
+    escolhido = resultados["avaliacoes"][nome_modelo]
+
+    # Formata as porcentagens para o HTML
+    comparacao = []
+
+    for item in resultados["comparacao"]:
+        comparacao.append({
+            "modelo": item["modelo"],
+            "acuracia": f"{item['acuracia']:.2%}",
+            "precisao": f"{item['precisao']:.2%}",
+            "recall": f"{item['recall']:.2%}",
+            "f1": f"{item['f1']:.2%}"
+        })
+
+    return {
+        "modelo": nome_modelo,
+        "tamanho_teste": resultados["tamanho_teste"],
+        "distribuicao_teste": resultados["distribuicao_teste"],
+        "baseline": f"{resultados['baseline']:.2%}",
+        "acuracia": f"{escolhido['acuracia']:.2%}",
+        "comparacao": comparacao,
+        "matriz_confusao": escolhido["matriz_confusao"]
+    }
+
+
+# 4. Recebe os dados do formulário e faz uma previsão
+def fazer_previsao(nome_modelo, dados, campos_ativos):
+    if nome_modelo not in ARQUIVOS_MODELOS:
+        raise ValueError("Modelo não reconhecido.")
+
+    if not campos_ativos:
+        raise ValueError("Selecione pelo menos um campo.")
+
+    for campo in campos_ativos:
+        if campo not in COLUNAS:
+            raise ValueError(f"Campo desconhecido: {campo}")
+
+    paciente = {}
+
+    # Conferindo as nove características
+    for coluna in COLUNAS:
+
+        # Campos desmarcados serão preenchidos pelo Pipeline
+        if coluna not in campos_ativos:
+            paciente[coluna] = np.nan
+            continue
+
+        valor = dados.get(coluna)
+
+        if valor is None or str(valor).strip() == "":
+            raise ValueError(f"Preencha o campo: {coluna}")
+
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError):
+            raise ValueError(f"Valor inválido para {coluna}") from None
+
+        # Não aceita números infinitos ou NaN
+        if not np.isfinite(numero):
+            raise ValueError(f"Valor inválido para {coluna}")
+
+        # Valida as categorias
+        if coluna in CATEGORIAS_VALIDAS:
+            if numero not in CATEGORIAS_VALIDAS[coluna]:
+                raise ValueError(f"Categoria inválida para {coluna}")
+
+        # Valida as variáveis numéricas
+        if coluna in NUMERICAS:
+            if numero <= 0:
+                raise ValueError(f"Valor inválido para {coluna}")
+
+        paciente[coluna] = numero
+
+    # Criando uma linha com todas as nove características
+    entrada = pd.DataFrame([paciente], columns=COLUNAS)
+
+    # Carregando o algoritmo selecionado
+    modelo = joblib.load(
+        PASTA_MODELOS / ARQUIVOS_MODELOS[nome_modelo]
+    )
+
+    # Realizando uma nova previsão
+    resultado = int(modelo.predict(entrada)[0])
+
+    if resultado == 1:
+        return "Classe 1 — indicação de doença cardíaca"
+
+    return "Classe 0 — sem indicação de doença cardíaca"
+
+
+# Executa o treinamento somente ao rodar: python treinar.py
+if __name__ == "__main__":
+    treinar_modelos()
